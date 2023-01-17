@@ -1,9 +1,7 @@
 package africa.semicolon.unicoin.Registration.token;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import africa.semicolon.unicoin.user.User;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -20,5 +18,8 @@ public class ConfirmationToken{
     private LocalDateTime createAt;
     private LocalDateTime expiredAt;
     private LocalDateTime confirmedAt;
+    @ManyToOne
+    @JoinColumn(name="user_id", referencedColumnName="id")
+    private User user;
 
 }
