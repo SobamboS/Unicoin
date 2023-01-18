@@ -8,12 +8,15 @@ import africa.semicolon.unicoin.user.User;
 import africa.semicolon.unicoin.user.UserRepository;
 import africa.semicolon.unicoin.user.UserRole;
 import africa.semicolon.unicoin.user.UserService;
+import jakarta.mail.MessagingException;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
+@AllArgsConstructor
 public class RegistrationService{
     @Autowired
     private UserRepository userRepository;
@@ -25,12 +28,12 @@ public class RegistrationService{
    private EmailSender emailSender;
 
     private ConfirmationTokenService confirmationTokenService;
-    public String register(RegistrationRequest registrationRequest){
+    public String register(RegistrationRequest registrationRequest) throws MessagingException{
         boolean emailExists = userRepository
                 .findByEmailAddressIgnoreCase(registrationRequest.getEmailAddress())
                 .isPresent();
         if(emailExists) throw new IllegalStateException("Email Address already exists");
-        return userService.createAccount(new User(
+        String token = userService.createAccount(new User(
                 registrationRequest.getEmailAddress(),
                 registrationRequest.getFirstName(),
                 registrationRequest.getLastName(),
