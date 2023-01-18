@@ -1,7 +1,7 @@
 package africa.semicolon.unicoin.Registration;
 
 import africa.semicolon.unicoin.Email.EmailSender;
-import africa.semicolon.unicoin.Registration.token.ConfirmationToken;
+import africa.semicolon.unicoin.Registration.token.ConfirmTokenRequest;
 import africa.semicolon.unicoin.Registration.token.ConfirmationTokenRepository;
 import africa.semicolon.unicoin.Registration.token.ConfirmationTokenService;
 import africa.semicolon.unicoin.user.User;
@@ -20,9 +20,9 @@ public class RegistrationService{
     @Autowired
     private UserService userService;
     @Autowired
-    private ConfirmationTokenRepository confirmationTokenRepository;
+    ConfirmationTokenRepository confirmationTokenRepository;
     @Autowired
-    EmailSender emailSender;
+   private EmailSender emailSender;
 
     private ConfirmationTokenService confirmationTokenService;
     public String register(RegistrationRequest registrationRequest){
@@ -37,19 +37,20 @@ public class RegistrationService{
                 registrationRequest.getPassword(),
                 UserRole.USER));
 
-    emailSender.send(registrationRequest.getEmailAddress(),
-            buildEmail(registrationRequest.getFirstName(), token));
+    emailSender.send(registrationRequest.getEmailAddress(),buildEmail(registrationRequest.getFirstName(), token));
     return token;
     }
 
 
-    public String confirmToken(String confirmationToken){
-        ConfirmationToken token = confirmationTokenRepository.findBytoken(confirmationToken)
-                .elseThrow(()-> new IllegalStateException("Token does not exist"));
+    public String confirmToken(ConfirmTokenRequest confirmTokenRequest){
+        var token = confirmationTokenService.getConfirmationToken(confirmTokenRequest.getToken())
+                .orElseThrow(()-> new IllegalStateException("Token does not exist"));
 
         if(token.getExpiredAt().isBefore(LocalDateTime.now())){
             throw new IllegalStateException("Token expired");
-
+        }
+        confirmationTokenService.setConfirmedAt(token.getToken());
+        userService.enableUser(confirmTokenRequest.getEmailAddress());
         return "Confirmed";
     }
 
@@ -123,4 +124,4 @@ public class RegistrationService{
         }
 
     }
-}
+
