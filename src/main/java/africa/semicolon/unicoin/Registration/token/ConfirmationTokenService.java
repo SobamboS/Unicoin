@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class ConfirmationTokenService{
@@ -14,11 +15,15 @@ public class ConfirmationTokenService{
         confirmationTokenRepository.save(confirmationToken);
     }
 
-    public  void getConfirmationToken(String token){
-        confirmationTokenRepository.findByToken(token);
+    public Optional<ConfirmationToken> getConfirmationToken(String token){
+        return confirmationTokenRepository.findByToken(token);
     }
 
-    public void deleteExpiredToken(LocalDateTime currentTime){
-        confirmationTokenRepository.deleteConfirmationTokensByExpiredAtBefore(currentTime);
+    public void deleteExpiredToken(){
+        confirmationTokenRepository.deleteConfirmationTokensByExpiredAtBefore(LocalDateTime.now());
+    }
+
+    public void setConfirmedAt(String token){
+        confirmationTokenRepository.setConfirmedAt(LocalDateTime.now(), token);
     }
 }

@@ -10,24 +10,27 @@ import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService{
-    @Autowired
+@Autowired
     private UserRepository userRepository;
 
-    @Autowired
+@Autowired
     private ConfirmationTokenService confirmationTokenService;
 
     @Override
     public String createAccount(User user){
-        userRepository.save(user);
-
-        String token =UUID.randomUUID().toString();
-        ConfirmationToken confirmationToken = new ConfirmationToken(
-                token,
+         userRepository.save(user);
+        String token = UUID.randomUUID().toString();
+        ConfirmationToken confirmationToken = new ConfirmationToken(token,
                 LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(10)
-        );
+                LocalDateTime.now().plusMinutes(10),
+                user);
 
-        ConfirmationTokenService.saveConfirmationToken(confirmationToken);
-        return "Created";
+        confirmationTokenService.saveConfirmationToken(confirmationToken);
+        return token;
+    }
+
+    @Override
+    public void enableUser(String emailAddress){
+        userRepository.enable(emailAddress);
     }
 }
