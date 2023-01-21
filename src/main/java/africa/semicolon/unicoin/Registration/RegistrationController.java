@@ -17,7 +17,7 @@ import java.time.ZonedDateTime;
 @RestController
 @RequestMapping(path="api/v1/registration")
 public class RegistrationController{
-@Autowired
+    @Autowired
     RegistrationService registrationService;
 
     @PostMapping("/register")
@@ -44,5 +44,17 @@ public class RegistrationController{
                 .isSuccessful(true)
                 .build();
         return  new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest httpServletRequest){
+        ApiResponse apiResponse =ApiResponse.builder()
+                .status(HttpStatus.OK.value())
+                .data(registrationService.login(loginRequest))
+                .timeStamp(ZonedDateTime.now())
+                .path(httpServletRequest.getRequestURI())
+                .isSuccessful(true)
+                .build();
+        return  new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

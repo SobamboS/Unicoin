@@ -1,9 +1,12 @@
 package africa.semicolon.unicoin.Registration;
 
 import africa.semicolon.unicoin.Email.EmailSender;
+
 import africa.semicolon.unicoin.Registration.token.ConfirmTokenRequest;
 import africa.semicolon.unicoin.Registration.token.ConfirmationTokenRepository;
 import africa.semicolon.unicoin.Registration.token.ConfirmationTokenService;
+
+import africa.semicolon.unicoin.exception.RegistrationException;
 import africa.semicolon.unicoin.user.User;
 import africa.semicolon.unicoin.user.UserRepository;
 import africa.semicolon.unicoin.user.UserRole;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -29,21 +33,20 @@ public class RegistrationService{
 
     private ConfirmationTokenService confirmationTokenService;
     public String register(RegistrationRequest registrationRequest) throws MessagingException{
-        boolean emailExists = userRepository
-                .findByEmailAddressIgnoreCase(registrationRequest.getEmailAddress())
-                .isPresent();
-        if(emailExists) throw new IllegalStateException("Email Address already exists");
-        String token = userService.createAccount(new User(
-                registrationRequest.getEmailAddress(),
-                registrationRequest.getFirstName(),
-                registrationRequest.getLastName(),
-                registrationRequest.getPassword(),
-                UserRole.USER));
+        boolean emailExists=userRepository
+        .findByEmailAddressIgnoreCase(registrationRequest.getEmailAddress())
+        .isPresent();
+        if(emailExists)throw new IllegalStateException("Email Address already exists");
+        String token=userService.createAccount(new User(
+        registrationRequest.getEmailAddress(),
+        registrationRequest.getFirstName(),
+        registrationRequest.getLastName(),
+        registrationRequest.getPassword(),
+        UserRole.USER));
 
-    emailSender.send(registrationRequest.getEmailAddress(),buildEmail(registrationRequest.getFirstName(), token));
-    return token;
-    }
-
+        emailSender.send(registrationRequest.getEmailAddress(),buildEmail(registrationRequest.getFirstName(),token));
+        return token;
+        }
 
     public String confirmToken(ConfirmTokenRequest confirmTokenRequest){
         var token = confirmationTokenService.getConfirmationToken(confirmTokenRequest.getToken())
@@ -56,6 +59,27 @@ public class RegistrationService{
         userService.enableUser(confirmTokenRequest.getEmailAddress());
         return "Confirmed";
     }
+
+    public String login(LoginRequest loginRequest){
+        var foundUser =userService.findByEmailAddressIgnoreCase(loginRequest.getEmailAddress());
+        if(Objects.isNull(foundUser)) throw new RegistrationException("Invalid email Address");
+        try{
+            if(!foundUser.get().getPassword().equals(loginRequest.getPassword())){
+                throw new RegistrationException("Password does not Match");
+            }
+        } catch (RegistrationException e) {
+            throw new RuntimeException(e);
+        }
+        if(!foundUser.get().getIsDisabled().equals(false)){
+           throw new RegistrationException("Account not yet verified");
+        }
+        return "Login Successful";
+    }
+
+//    public  String forgotPassword(ForgotPasswordRequest forgotPasswordRequest){
+//        var foundUser = userService.findByEmailAddressIgnoreCase(forgotPasswordRequest.getEmailAddress());
+//        if()
+//    }
 
     private String buildEmail(String name, String link){
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +

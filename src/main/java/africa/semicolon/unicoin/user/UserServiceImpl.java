@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -32,5 +33,10 @@ public class UserServiceImpl implements UserService{
     @Override
     public void enableUser(String emailAddress){
         userRepository.enable(emailAddress);
+    }
+
+    @Override
+    public Optional<User> findByEmailAddressIgnoreCase(String emailAddress){
+        return userRepository.findByEmailAddressIgnoreCase(emailAddress);
     }
 }
