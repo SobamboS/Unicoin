@@ -6,6 +6,7 @@ import africa.semicolon.unicoin.Registration.token.ConfirmTokenRequest;
 import africa.semicolon.unicoin.Registration.token.ConfirmationTokenRepository;
 import africa.semicolon.unicoin.Registration.token.ConfirmationTokenService;
 
+import africa.semicolon.unicoin.Registration.token.ForgotPasswordRequest;
 import africa.semicolon.unicoin.exception.RegistrationException;
 import africa.semicolon.unicoin.user.User;
 import africa.semicolon.unicoin.user.UserRepository;
@@ -76,10 +77,10 @@ public class RegistrationService{
         return "Login Successful";
     }
 
-//    public  String forgotPassword(ForgotPasswordRequest forgotPasswordRequest){
-//        var foundUser = userService.findByEmailAddressIgnoreCase(forgotPasswordRequest.getEmailAddress());
-//        if()
-//    }
+    public  String forgotPassword(ForgotPasswordRequest forgotPasswordRequest){
+        var foundUser = userService.findByEmailAddressIgnoreCase(forgotPasswordRequest.getEmailAddress());
+        if()
+    }
 
     private String buildEmail(String name, String link){
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
